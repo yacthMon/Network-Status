@@ -74,7 +74,7 @@ class Monitor {
         }
       }
     });
-    
+
     this.screen.append(this.statusBody);
     this.screen.append(this.bodyLog);
     this.screen.append(this.bodyNetworkConfig);
@@ -86,7 +86,7 @@ class Monitor {
 
     //== Catch error ===========================================
     this.error = (err, code) => {
-      this.log(`{red-fg}[${(code ? `Error ${code} `: "uncaughtException")}]{/red-fg} update in errors log ${this.fullCurrentTime()}`);
+      this.log(`{red-fg}[${(code ? `Error ${code} ` : "uncaughtException")}]{/red-fg} update in errors log ${this.fullCurrentTime()}`);
     }
     console.error = this.error;
     process.on('uncaughtException', this.error);
@@ -96,18 +96,18 @@ class Monitor {
     });
     let runningCheck = ["|", "/", "-", "\\"];
     let indexRunning = 0;
-    this.processStatus = setInterval(()=>{
+    this.processStatus = setInterval(() => {
       indexRunning = ++indexRunning == 4 ? 0 : indexRunning;
       this.status(`{bold}{green-fg}[${runningCheck[indexRunning]}] Network Status v0.0.1 ___ {/green-fg}{/bold}`)
-    },100);
+    }, 100);
 
     this.bodyNetworkConfig.pushLine("Network config");
-    this.setConfig({publicIP : '.. loading ..', privateIP:'.. loading ..', gateway:'.. loading ..', dns:'.. loading ..'})
+    this.setConfig({ publicIP: '.. loading ..', privateIP: '.. loading ..', gateway: '.. loading ..', dns: '.. loading ..' })
     this.bodyTestResult.pushLine("Test connecting");
-    // this.setTestConnecting(0,"8.8.8.8");
-    // this.setTestConnecting(1,"www.google.co.th");
-    // this.updateTestConnecting(0, {ping:67});
-    // this.updateTestConnecting(1, {ping:32});
+    this.setTestConnecting(0, "www.facebook.com");
+    this.setTestConnecting(1, "www.google.co.th");
+    this.updateTestConnecting(0, { ping: 205 });
+    this.updateTestConnecting(1, { ping: 32 });
     this.log("Initial System . . .");
   }
 
@@ -139,32 +139,32 @@ class Monitor {
     return `[${time.getDate()}/${(time.getMonth() + 1)}/${time.getFullYear()}] ${this.currentTime()}:${time.getMilliseconds()}`;
   }
 
-  setConfig({publicIP, privateIP, gateway, dns}){
-    publicIP ? this.bodyNetworkConfig.setLine(1, `Public IP  : {bold}${publicIP}{/bold}`):''
-    privateIP ? this.bodyNetworkConfig.setLine(2, `Private IP : {bold}${privateIP}{/bold}`):''
-    gateway ? this.bodyNetworkConfig.setLine(3, `Gateway    : {bold}${gateway}{/bold}`):''
-    dns ? this.bodyNetworkConfig.setLine(4, `DNS        : {bold}${dns}{/bold}`):''
+  setConfig({ publicIP, privateIP, gateway, dns }) {
+    publicIP ? this.bodyNetworkConfig.setLine(1, `Public IP  : {bold}${publicIP}{/bold}`) : ''
+    privateIP ? this.bodyNetworkConfig.setLine(2, `Private IP : {bold}${privateIP}{/bold}`) : ''
+    gateway ? this.bodyNetworkConfig.setLine(3, `Gateway    : {bold}${gateway}{/bold}`) : ''
+    dns ? this.bodyNetworkConfig.setLine(4, `DNS        : {bold}${dns}{/bold}`) : ''
     this.screen.render();
   }
 
-  setTestConnecting(line, host){
+  setTestConnecting(line, host) {
     let hostLength = host.length;
-    if(hostLength > 20){
-      host = host.substring(0,20); 
-    }else{
-      for(;host.length < 20;){
+    if (hostLength > 20) {
+      host = host.substring(0, 20);
+    } else {
+      for (; host.length < 20;) {
         host += ' ';
       }
     }
     host += "     - ms"
-    this.bodyTestResult.setLine(line+1, host);
+    this.bodyTestResult.setLine(line + 1, host);
     this.screen.render();
   }
 
-  updateTestConnecting(line, {ping}){
+  updateTestConnecting(line, { ping }) {
     line++;
-    let host = this.bodyTestResult.getLine(line).substring(0,20);
-    let pingText = ping > 0 ? `{green-fg}${ping}ms{/green-fg}` : ping > 150 ? `{yellow-fg}${ping}ms{/yellow-fg}` : `{red-fg}${ping}ms{/red-fg}` ;
+    let host = this.bodyTestResult.getLine(line).substring(0, 20);
+    let pingText = ping <= 150 ? `{green-fg}${ping}ms{/green-fg}` : ping <= 1000 ? `{yellow-fg}${ping}ms{/yellow-fg}` : `{red-fg}${ping}ms{/red-fg}`;
     let text = `${host}     {bold}${pingText}{/bold}`     //[{bold}${status}{/bold}]`
     this.bodyTestResult.setLine(line, text);
     this.screen.render();
