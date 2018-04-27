@@ -2,7 +2,9 @@ let blessed = require('blessed');
 class Monitor {
   constructor() {
     this.debugMode = false;
-    this.screen = blessed.screen()
+    this.screen = blessed.screen({
+      smartCSR: true
+    })
     this.statusBody = blessed.box({
       top: 0,
       left: 0,
@@ -71,14 +73,20 @@ class Monitor {
       this.logNormal.write(shurdownServerText + " with code : " + code);
       this.logError.write(shurdownServerText + " with code : " + code);
     });
+    let runningCheck = ["|", "/", "-", "\\"];
+    let indexRunning = 0;
+    this.processStatus = setInterval(()=>{
+      indexRunning = ++indexRunning == 4 ? 0 : indexRunning;
+      this.status(`{bold}{green-fg}[${runningCheck[indexRunning]}] Network Status v0.0.1 ___ {/green-fg}{/bold}`)
+    },100);
 
     this.bodyNetworkConfig.pushLine("Network config");
     this.setConfig({publicIP : '.. loading ..', privateIP:'.. loading ..', gateway:'.. loading ..', dns:'.. loading ..'})
-    this.log("Log");
+    this.log("Initial System . . .");
   }
 
   status(text) {
-    this.statusBody.setLine(0, '{black-fg}{white-bg}' + text + '{/white-bg}{/black-fg}');
+    this.statusBody.setLine(0, text);
     this.screen.render();
   }
 
@@ -106,10 +114,10 @@ class Monitor {
   }
 
   setConfig({publicIP, privateIP, gateway, dns}){
-    publicIP ? this.bodyNetworkConfig.setLine(1, `Public IP  : ${publicIP}`):''
-    privateIP ? this.bodyNetworkConfig.setLine(2, `Private IP : ${privateIP}`):''
-    gateway ? this.bodyNetworkConfig.setLine(3, `Gateway    : ${gateway}`):''
-    dns ? this.bodyNetworkConfig.setLine(4, `DNS        : ${dns}`):''
+    publicIP ? this.bodyNetworkConfig.setLine(1, `Public IP  : {bold}${publicIP}{/bold}`):''
+    privateIP ? this.bodyNetworkConfig.setLine(2, `Private IP : {bold}${privateIP}{/bold}`):''
+    gateway ? this.bodyNetworkConfig.setLine(3, `Gateway    : {bold}${gateway}{/bold}`):''
+    dns ? this.bodyNetworkConfig.setLine(4, `DNS        : {bold}${dns}{/bold}`):''
     this.screen.render();
   }
 }
