@@ -1,0 +1,16 @@
+{
+  "name": "network-status",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "yacth_Mon <yacthmon@gmail.com>",
+  "license": "ISC",
+  "dependencies": {
+    "blessed": "^0.1.81",
+    "network": "^0.4.1",
+    "ping": "^0.2.2"
+  }
+}
