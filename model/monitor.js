@@ -1,7 +1,6 @@
 let blessed = require('blessed');
 class Monitor {
   constructor() {
-    this.debugMode = false;
     this.screen = blessed.screen({
       smartCSR: true
     })
@@ -54,10 +53,32 @@ class Monitor {
         }
       }
     });
-
+    this.bodyTestResult = blessed.box({
+      top: 1,
+      left: 59,
+      width: '40%',
+      height: '75%',
+      tags: true,
+      scrollable: true,
+      border: {
+        type: 'line'
+      },
+      style: {
+        fg: 'white',
+        bg: 'black',
+        border: {
+          fg: '#f0f0f0'
+        },
+        hover: {
+          bg: 'green'
+        }
+      }
+    });
+    
     this.screen.append(this.statusBody);
     this.screen.append(this.bodyLog);
     this.screen.append(this.bodyNetworkConfig);
+    this.screen.append(this.bodyTestResult);
 
     this.screen.key(['escape', 'q', 'C-c'], function (ch, key) {
       return process.exit(0);
@@ -82,6 +103,11 @@ class Monitor {
 
     this.bodyNetworkConfig.pushLine("Network config");
     this.setConfig({publicIP : '.. loading ..', privateIP:'.. loading ..', gateway:'.. loading ..', dns:'.. loading ..'})
+    this.bodyTestResult.pushLine("Test connecting");
+    // this.setTestConnecting(0,"8.8.8.8");
+    // this.setTestConnecting(1,"www.google.co.th");
+    // this.updateTestConnecting(0, {ping:67});
+    // this.updateTestConnecting(1, {ping:32});
     this.log("Initial System . . .");
   }
 
@@ -118,6 +144,29 @@ class Monitor {
     privateIP ? this.bodyNetworkConfig.setLine(2, `Private IP : {bold}${privateIP}{/bold}`):''
     gateway ? this.bodyNetworkConfig.setLine(3, `Gateway    : {bold}${gateway}{/bold}`):''
     dns ? this.bodyNetworkConfig.setLine(4, `DNS        : {bold}${dns}{/bold}`):''
+    this.screen.render();
+  }
+
+  setTestConnecting(line, host){
+    let hostLength = host.length;
+    if(hostLength > 20){
+      host = host.substring(0,20); 
+    }else{
+      for(;host.length < 20;){
+        host += ' ';
+      }
+    }
+    host += "     - ms"
+    this.bodyTestResult.setLine(line+1, host);
+    this.screen.render();
+  }
+
+  updateTestConnecting(line, {ping}){
+    line++;
+    let host = this.bodyTestResult.getLine(line).substring(0,20);
+    let pingText = ping > 0 ? `{green-fg}${ping}ms{/green-fg}` : ping > 150 ? `{yellow-fg}${ping}ms{/yellow-fg}` : `{red-fg}${ping}ms{/red-fg}` ;
+    let text = `${host}     {bold}${pingText}{/bold}`     //[{bold}${status}{/bold}]`
+    this.bodyTestResult.setLine(line, text);
     this.screen.render();
   }
 }
